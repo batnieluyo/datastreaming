@@ -1,0 +1,58 @@
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:latest
+    container_name: redpanda-laravel
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=2G
+      - --overprovisioned
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092,EXTERNAL://localhost:19092
+      - --rpc-addr=0.0.0.0:33145
+      - --advertise-rpc-addr=redpanda:33145
+      - --pandaproxy-addr=0.0.0.0:8082
+      - --advertise-pandaproxy-addr=redpanda:8082
+    ports:
+      - "8081:8081"   # Schema registry port
+      - "19092:19092" # external proxy
+      - "8082:8082"   # Pandaproxy (opcional, REST)
+      - "9092:9092"   # Kafka API
+      - "9644:9644"   # Admin API
+    volumes:
+      - redpanda-laravel-data:/var/lib/redpanda/data
+      - ./create-topics.sh:/etc/redpanda/post-start.d/create-topics.sh
+  console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    container_name: redpanda-laravel-console
+    ports:
+      - "8080:8080"     # UI web
+    environment:
+      - KAFKA_BROKERS=redpanda:9092
+    depends_on:
+      - redpanda
+    volumes:
+      - ./console-config.yml:/etc/console/config.yml:ro
+  laravel-streaming:
+    container_name: laravel-streaming
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 9090:8080
+    volumes:
+      - ../../:/var/www/html
+    environment:
+      # Increase the upload limit to 500M
+      PHP_UPLOAD_MAX_FILE_SIZE: "500M"
+      # Turn OPCache on
+      PHP_OPCACHE_ENABLE: "1"
+      KAFKA_BROKERS: "redpanda:9092"
+    depends_on:
+      - redpanda
+
+volumes:
+  redpanda-laravel-data:
