@@ -89,6 +89,18 @@ docker compose -f .docker/laravel/docker-compose.yml down
 
 ---
 
+# Setup de base de datos
+
+```bash
+# Entrar al contenedor de Laravel
+docker exec -it laravel sh
+
+# Correr migraciones
+php artisan migrate
+```
+
+---
+
 # 🎧 Escuchar Eventos (Consumer)
 
 ```bash
