@@ -29,20 +29,48 @@ services:
     image: docker.redpanda.com/redpandadata/console:latest
     container_name: redpanda-laravel-console
     ports:
-      - "8080:8080"     # UI web
+      - "9090:8080"     # UI web
     environment:
       - KAFKA_BROKERS=redpanda:9092
     depends_on:
       - redpanda
     volumes:
       - ./console-config.yml:/etc/console/config.yml:ro
-  laravel-streaming:
-    container_name: laravel-streaming
+  postgres:
+    image: pgvector/pgvector:pg16   # pgvector preinstalado sobre Postgres 16
+    container_name: postgres-laravel
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "laravel"
+      POSTGRES_USER: "laravel"
+      POSTGRES_PASSWORD: "password"
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: test_master_key
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch-data:/meili_data
+  app:
+    container_name: laravel
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 9090:8080
+      - "8080:8080"
     volumes:
       - ../../:/var/www/html
     environment:
@@ -51,8 +79,21 @@ services:
       # Turn OPCache on
       PHP_OPCACHE_ENABLE: "1"
       KAFKA_BROKERS: "redpanda:9092"
+      SCOUT_DRIVER: "meilisearch"
+      MEILISEARCH_HOST: "http://meilisearch:7700"
+      MEILISEARCH_KEY: "test_master_key"
+      DB_CONNECTION: "pgsql"
+      DB_HOST: "postgres"
+      DB_PORT: "5432"
+      DB_DATABASE: "laravel"
+      DB_USERNAME: "laravel"
+      DB_PASSWORD: "password"
     depends_on:
       - redpanda
+      - postgres
+      - meilisearch
 
 volumes:
   redpanda-laravel-data:
+  postgres-data:
+  meilisearch-data:
