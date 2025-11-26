@@ -339,7 +339,7 @@ return [
          * Embedding provider for generating vectors.
          * Supported: 'openai', 'cohere', 'ollama', 'gemini'
          */
-        'embedding_provider' => env('VIZRA_ADK_EMBEDDING_PROVIDER', 'openai'),
+        'embedding_provider' => env('VIZRA_ADK_EMBEDDING_PROVIDER', 'gemini'),
 
         /**
          * Embedding models for each provider.
@@ -390,11 +390,9 @@ return [
          * Document chunking configuration.
          */
         'chunking' => [
-            'strategy' => env('VIZRA_ADK_CHUNK_STRATEGY', 'sentence'), // 'sentence' or 'paragraph'
-            'chunk_size' => env('VIZRA_ADK_CHUNK_SIZE', 1000), // Characters per chunk
-            'overlap' => env('VIZRA_ADK_CHUNK_OVERLAP', 200), // Overlap between chunks
-            'separators' => ["\n\n", "\n", ". ", ", ", " "],
-            'keep_separators' => true,
+            'strategy' => env('VIZRA_ADK_CHUNK_STRATEGY', 'sentence'),
+            'chunk_size' => env('VIZRA_ADK_CHUNK_SIZE', 1000),
+            'overlap' => env('VIZRA_ADK_CHUNK_OVERLAP', 200),
         ],
 
         /**
@@ -402,8 +400,8 @@ return [
          */
         'rag' => [
             'context_template' => "Based on the following context:\n{context}\n\nAnswer this question: {query}",
-            'max_context_length' => env('VIZRA_ADK_RAG_MAX_CONTEXT', 4000),
-            'include_metadata' => env('VIZRA_ADK_RAG_INCLUDE_METADATA', true),
+            'max_context_length' => 4000,
+            'include_metadata' => true,
         ],
     ],
 ];

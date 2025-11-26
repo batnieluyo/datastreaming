@@ -3,6 +3,7 @@
 namespace App\Livewire\Webapp;
 
 use App\Agents\CustomerSupportAgent;
+use App\Agents\RootAgent;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -48,7 +49,12 @@ class Chat extends Component
     {
         $buffer = '';
 
-        $stream = CustomerSupportAgent::run(array_last($this->messages)['body'])
+        /*$stream = CustomerSupportAgent::run(array_last($this->messages)['body'])
+            ->forUser(auth()->user())
+            ->withSession($this->sessionId)
+            ->streaming()
+            ->go();*/
+        $stream = RootAgent::run(array_last($this->messages)['body'])
             ->forUser(auth()->user())
             ->withSession($this->sessionId)
             ->streaming()
