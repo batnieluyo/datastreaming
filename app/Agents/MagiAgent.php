@@ -6,28 +6,30 @@ use App\Tools\SearchDocument;
 use Prism\Prism\Text\PendingRequest;
 use Vizra\VizraADK\Agents\BaseLlmAgent;
 use Vizra\VizraADK\Contracts\ToolInterface;
-use Vizra\VizraADK\Facades\Agent;
 use Vizra\VizraADK\System\AgentContext;
 // use App\Tools\YourTool; // Example: Import your tool
 
-class CustomerSupportAgent extends BaseLlmAgent
+class MagiAgent extends BaseLlmAgent
 {
-    protected string $name = 'customer_support_agent';
-    protected string $description = 'Customer Support Agent';
+    protected string $name = 'magi_agent';
+    protected string $description = 'Describe what this agent does.';
 
     /**
      * Agent instructions hierarchy (first found wins):
      * 1. Runtime: $agent->setPromptOverride('...')
      * 2. Database: agent_prompt_versions table (if enabled)
-     * 3. File: resources/prompts/customer_support_agent/default.blade.php
+     * 3. File: resources/prompts/magi_agent/default.blade.php
      * 4. Fallback: This property
      * 
      * The prompt file has been created for you at:
-     * resources/prompts/customer_support_agent/default.blade.php
+     * resources/prompts/magi_agent/default.blade.php
      */
+    protected string $instructions = 'You are Magi Agent. See resources/prompts/magi_agent/default.blade.php for full instructions.';
+    
+    protected string $model = '';
 
     protected array $tools = [
-         SearchDocument::class
+        SearchDocument::class
     ];
 
     /*
